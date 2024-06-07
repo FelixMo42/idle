@@ -84,3 +84,7 @@ label.box {
 .padding-top {
     padding-top: 15px;
 }
+
+.disabled {
+    background-color: gray;
+}

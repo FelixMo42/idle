@@ -55,6 +55,28 @@ class Eq extends Watchable {
     }
 }
 
+class Timer extends Watchable {
+    time = 0
+
+    set(length) {
+        this.time = Date.now() + length
+        this.fire()
+        setTimeout(() => this.fire(), length)
+    }
+
+    done() {
+        return Date.now() > this.time
+    }
+}
+
+function seconds(amu) {
+    return amu * 1000
+}
+
+function minute(amu) {
+    return seconds(amu * 60)
+}
+
 const data = {
     space: new Var(7),
     resources: {
@@ -63,7 +85,7 @@ const data = {
     }
 }
 
-const newSpaceCost = new Eq(() => 3 ** (data.space.value - data.space.default), [data.space])
+const newSpaceCost = new Eq(() => 3 ** (data.space.value - data.space.default + 1), [data.space])
 
 /*****************/
 /* HTML ELEMENTS */
@@ -115,6 +137,21 @@ function button(text, onclick, classes="") {
     return el
 }
 
+function buttonWithTimer(text, timer, onclick) {
+    const el = m("button", text)
+    el.onclick = onclick
+
+    timer.watch(() => {
+        if (timer.done()) {
+            el.classList.remove("disabled")
+        } else {
+            el.classList.add("disabled")
+        }
+    })    
+
+    return el
+}
+
 function box(label, contents) {
     return m("div",
         m("label.box", label),
@@ -130,13 +167,17 @@ const crops = [
     {
         name: "corn",
         weight: 1,
-        amu: new Var(0),
+        amu: new Var(1),
+        timer: new Timer(),
+        growTime: minute(1),
         action: () => data.resources.food.add(1)
     },
     {
         name: "tree",
         weight: 5,
-        amu: new Var(0),
+        amu: new Var(1),
+        timer: new Timer(),
+        growTime: minute(60),
         action: () => data.resources.wood.add(1)
     },
 ]
@@ -144,11 +185,20 @@ const crops = [
 const tiles = [
     {
         name: "garden",
-        size: new Var(3),
+        size: new Eq(() => crops
+            .map(crop => crop.amu.value)
+            .reduce((a, b) => a + b),
+            [...crops.map(crop => crop.amu)]
+        ),
         core: crops.map((crop) => 
             m("div.row",
                 m("div.flex.align", crop.name),
-                button("Harvest", crop.action)
+                buttonWithTimer("Harvest", crop.timer, () => {
+                    if (crop.timer.done()) {
+                        crop.timer.set(minute(1))
+                        crop.action(crop)
+                    }
+                }),
             ),
         )
     }
@@ -181,7 +231,7 @@ document
                 }
             },
             ".flex"
-        ))
+        )),
     )
 
 document
