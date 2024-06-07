@@ -54,7 +54,7 @@ div.box {
 }
 
 label.box {
-    top: 7px;
+    top: 5px;
     left: 14px;
     position: relative;
     background-color: white;
@@ -82,9 +82,29 @@ label.box {
 }
 
 .padding-top {
-    padding-top: 15px;
+    padding-top: 10px;
 }
 
 .disabled {
     background-color: gray;
+}
+
+.width {
+    width: 100%;
+}
+
+.p {
+    padding-bottom: var(--padding);
+}
+
+.center {
+    text-align: center;
+}
+
+.margin-right {
+    margin-right: var(--padding);
+}
+
+.hide {
+    display: none !important;
 }

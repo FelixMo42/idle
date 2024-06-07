@@ -20,6 +20,10 @@ export function s(...parts) {
     const make = () => parts
         .map((part) => {
             if (part instanceof Watchable) {
+                if (typeof part.value === "number") {
+                    return Math.floor(part.value * 100) / 100
+                }
+
                 return part.value
             } else {
                 return part
@@ -46,8 +50,9 @@ export function button(text, onclick, classes="") {
     return el
 }
 
-export function buttonWithTimer(text, timer, onclick) {
-    const el = m("button", text)
+export function buttonWithTimer(text, timer, onclick, classes="") {
+    const el = m("button" + classes, text)
+
     el.onclick = () => {
         if (timer.done()) {
             onclick()

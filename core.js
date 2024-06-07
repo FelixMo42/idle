@@ -1,5 +1,5 @@
 
-import { buttonWithTimer, m } from "./el.js"
+import { button, buttonWithTimer, m, s } from "./el.js"
 import { Eq, Timer, Var, minute } from "./lib.js"
 
 // TYPES // 
@@ -11,11 +11,18 @@ export const items = {
         name: "food",
         weight: 0.1,
         qty: new Var("items.food.qty", 0),
+        compostable: true,
     },
     wood: {
         name: "wood",
         weight: 1,
         qty: new Var("items.wood.qty", 0),
+        compostable: true,
+    },
+    soil: {
+        name: "soil",
+        weight: 3,
+        qty: new Var("items.soil.qty", 0),
     },
 }
 
@@ -38,6 +45,22 @@ export const crops = {
     }
 }
 
+const compostWeight = new Var("compost.weight", 0)
+const compostTimer = new Timer("compost.timer")
+
+function compost1(itemName) {
+    if (items[itemName].qty.value >= 1) {
+        compostWeight.add(items[itemName].weight)
+        items[itemName].qty.use(1)
+    }
+}
+
+function compostAll(itemName) {
+    const qty = items[itemName].qty.value
+    compostWeight.add(items[itemName].weight * qty)
+    items[itemName].qty.use(qty)
+}
+
 export const tiles = [
     {
         name: "garden",
@@ -57,7 +80,45 @@ export const tiles = [
                 }),
             ),
         )
+    },
+    {
+        name: "compost",
+        size: new Var("tiles.compost.size", 0),
+        view: () => [
+            m("div.p.center", s("~~ net weight: ", compostWeight, " ~~")),
+            ...Object.values(items)
+                .filter((item) => item.compostable)
+                .map((item) => m("div.row",
+                    button(`sacrafice 1 ${item.name}`, () => compost1(item.name), ".flex.margin-right"),
+                    button(`sacrafice all ${item.name}`, () => compostAll(item.name), ".flex"),
+                )),
+            buttonWithTimer("recive the blessing of the soil", compostTimer, () => {}, ".width")
+        ]
     }
+]
+
+export const buildButtons = [
+    {
+        name: "build compost shrine (3 food)",
+        visable: new Eq(() =>
+            tiles.find((t) => t.name === "compost").size.value == 0
+        , [ tiles.find((t) => t.name === "compost").size ]),
+        onclick: () => {
+            if (items.food.qty.value >= 3) {
+                items.food.qty.use(3)
+                tiles.find((t) => t.name === "compost").size.value = 1
+            }
+        }
+    },
+    ...Object.values(crops).map((crop) => ({
+        name: `plant ${crop.name} (1 soil)`,
+        onclick: () => {
+            if (items.soil.qty.value >= 1) {
+                items.soil.qty.use(3)
+                crop.qty.add(1)
+            }
+        }
+    }))
 ]
 
 // EQUATIONS //
