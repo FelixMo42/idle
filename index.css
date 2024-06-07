@@ -1,0 +1,86 @@
+:root {
+    --padding: 7px;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* LAYOUT */
+
+#root {
+    display: flex;
+    flex-direction: row;
+    max-width: 1000px;
+    margin: auto;
+}
+
+#left-bar, #right-bar {
+    width: 250px;
+    margin: var(--padding);
+}
+
+#center-bar {
+    flex: 1;
+    margin: var(--padding) 0px;
+}
+
+/* GENERAL STYLE */
+
+button {
+    border-radius: 0;
+    background: none;
+    border: 1px solid black;
+    padding: 5px 10px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: var(--padding);
+}
+
+button:hover {
+    text-decoration: underline;
+}
+
+div.box {
+    border: 1px solid black;
+    padding: var(--padding);
+    padding-bottom: 0px;
+    margin-bottom: 5px;
+}
+
+label.box {
+    top: 7px;
+    left: 14px;
+    position: relative;
+    background-color: white;
+    margin-top: var(--padding);
+    padding: 0px 3px;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.col {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex {
+    flex: 1;
+}
+
+.align {
+    display: flex;
+    align-items: center;
+}
+
+.padding-top {
+    padding-top: 15px;
+}
