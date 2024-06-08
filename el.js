@@ -82,3 +82,21 @@ export function box(label, contents) {
         m("div.box", ...contents)
     )
 }
+
+export function cond(show, el) {
+    if (show === undefined) return el
+
+    function check() {
+        if (show.value) {
+            el.classList.remove("hide")
+        } else {
+            el.classList.add("hide")
+        }
+    }
+
+    show.watch(check)
+
+    check()
+
+    return el
+}

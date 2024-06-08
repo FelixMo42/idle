@@ -1,23 +1,5 @@
-import { m, button, box, s } from "./el.js"
+import { m, button, box, s, cond } from "./el.js"
 import * as data from "./core.js"
-
-function cond(show, el) {
-    if (show === undefined) return el
-
-    function check() {
-        if (show.value) {
-            el.classList.remove("hide")
-        } else {
-            el.classList.add("hide")
-        }
-    }
-
-    show.watch(check)
-
-    check()
-
-    return el
-}
 
 export default function display() {
     document
@@ -36,8 +18,8 @@ export default function display() {
             m("div.row.padding-top", button(
                 s("expand island (", data.newTileCost, " wood)"),
                 () => {
-                    if (data.items.wood.value >= newTileCost.value) {
-                        data.items.wood.use(newTileCost.value)
+                    if (data.items.wood.value >= data.newTileCost.value) {
+                        data.items.wood.use(data.newTileCost.value)
                         data.space.add(1)
                     }
                 },
@@ -49,7 +31,7 @@ export default function display() {
         .getElementById('right-bar')
         .appendChild(box("resources",
             Object.values(data.items).map((item) =>
-                m("div.row",
+                m("div.row.p",
                     m("div.flex", item.name),
                     item.qty
                 )
