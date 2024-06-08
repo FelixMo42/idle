@@ -2,34 +2,76 @@
 import { button, buttonWithTimer, cond, m, s } from "./el.js"
 import { Eq, Timer, Var, minute } from "./lib.js"
 
-// TYPES // 
+// ITEMS //
+
+export const items = {}
+
+function addItems(...descs) {
+    for (const desc of descs) {
+        items[desc.name] = {
+            qty: new Var(`items.${desc.name}.qty`, 0),
+            ...desc
+        }
+    }
+}
+
+addItems(
+    {
+        name: "food",
+        weight: 0.1,
+        compostable: true,
+    },
+    {
+        name: "wood",
+        weight: 1,
+        compostable: true,
+    },
+    {
+        name: "metal",
+        weight: 2,
+    },
+    {
+        name: "soil",
+        weight: 3,
+    },
+)
+
+// TILES //
 
 export const space = new Var("space", 7)
 
-export const items = {
-    food: {
-        name: "food",
-        weight: 0.1,
-        qty: new Var("items.food.qty", 0),
-        compostable: true,
-    },
-    wood: {
-        name: "wood",
-        weight: 1,
-        qty: new Var("items.wood.qty", 0),
-        compostable: true,
-    },
-    metal: {
-        name: "metal",
-        weight: 2,
-        qty: new Var("items.metal.qty", 0),
-    },
-    soil: {
-        name: "soil",
-        weight: 3,
-        qty: new Var("items.soil.qty", 0),
-    },
+export const tiles = []
+
+export const newTileCost = new Eq(() =>
+    3 ** (space.value - space.default + 1),
+[space])
+
+export const emptyTiles = new Eq(() => {
+    const usedTiles = tiles
+        .map(tile => tile.size.value)
+        .reduce((a, b) => a + b, 0)
+    
+    return space.value - usedTiles
+}, [space, ...tiles.map(tile => tile.size)])
+
+function addTile(...descs) {
+    tiles.push(...descs)
 }
+
+export const buildTileButtons = []
+
+function addBuildTileButton(...descs) {
+    buildTileButtons.push(...descs.map((desc) => ({
+        ...desc,
+        onclick: () => {
+            if (emptyTiles.value > 0) {
+                desc.onclick()
+            }
+        }
+    })))
+}
+
+// GARDEN //
 
 export const crops = {
     corn: {
@@ -50,6 +92,44 @@ export const crops = {
     }
 }
 
+addTile({
+    name: "garden",
+    size: new Eq(() => Object.values(crops)
+        .map(crop => crop.qty.value)
+        .reduce((a, b) => a + b),
+        [...Object.values(crops).map(crop => crop.qty)]
+    ),
+    view: () => Object.values(crops).map((crop) =>
+        m("div.row",
+            buttonWithTimer(
+                s("harvest ", crop.name, " (", crop.qty, ")"),
+                crop.timer,
+                () => {
+                    if (crop.timer.done()) {
+                        crop.timer.set(crop.growTime)
+                        for (let i = 0; i < crop.qty.value; i++) {
+                            crop.action(crop)
+                        }
+                    }
+                },
+                ".width"
+            ),
+        ),
+    )
+})
+
+addBuildTileButton(...Object.values(crops).map((crop) => ({
+    name: `plant ${crop.name} (1 soil)`,
+    onclick: () => {
+        if (items.soil.qty.value >= 1) {
+            items.soil.qty.use(1)
+            crop.qty.add(1)
+        }
+    }
+})))
+
+// COMPOST //
+
 const compostWeight = new Var("compost.weight", 0)
 const compostTimer = new Timer("compost.timer")
 
@@ -65,6 +145,47 @@ function compostAll(itemName) {
     compostWeight.add(items[itemName].weight * qty)
     items[itemName].qty.use(qty)
 }
+
+addTile({
+    name: "compost",
+    size: new Var("tiles.compost.size", 0),
+    view: () => [
+        m("div.p.center", s("~~ net weight: ", compostWeight, " ~~")),
+        ...Object.values(items)
+            .filter((item) => item.compostable)
+            .map((item) => m("div.row",
+                button(`sacrafice 1 ${item.name}`, () => compost1(item.name), ".flex.margin-right"),
+                button(`sacrafice all ${item.name}`, () => compostAll(item.name), ".flex"),
+            )),
+        buttonWithTimer(
+            "recive the blessing of the soil",
+            compostTimer,
+            () => {
+                if (compostWeight.value >= 4) {
+                    const sqrt = Math.sqrt(compostWeight.value)
+                    compostWeight.use(sqrt)
+                    items.soil.qty.add(1)
+                }
+            },
+            ".width"
+        )
+    ]
+})
+
+addBuildTileButton({
+    name: "build compost shrine (3 food)",
+    visable: new Eq(() =>
+        tiles.find((t) => t.name === "compost").size.value == 0
+    , [ tiles.find((t) => t.name === "compost").size ]),
+    onclick: () => {
+        if (items.food.qty.value >= 3) {
+            items.food.qty.use(3)
+            tiles.find((t) => t.name === "compost").size.value = 1
+        }
+    }
+})
+
+// TIME MACHINE // 
 
 const timeMachineInvestigated = new Var("time_machine.investigated")
 const notTimeMachineInvestigated = new Eq(
@@ -82,113 +203,32 @@ const timeMachineSize = new Eq(
     [timeMachineLevel, timeMachineFixed]
 )
 
-export const tiles = [
-    {
-        name: "garden",
-        size: new Eq(() => Object.values(crops)
-            .map(crop => crop.qty.value)
-            .reduce((a, b) => a + b),
-            [...Object.values(crops).map(crop => crop.qty)]
-        ),
-        view: () => Object.values(crops).map((crop) =>
-            m("div.row",
-                buttonWithTimer(
-                    s("harvest ", crop.name, " (", crop.qty, ")"),
-                    crop.timer,
-                    () => {
-                        if (crop.timer.done()) {
-                            crop.timer.set(crop.growTime)
-                            for (let i = 0; i < crop.qty.value; i++) {
-                                crop.action(crop)
-                            }
-                        }
-                    },
-                    ".width"
-                ),
-            ),
-        )
-    },
-    {
-        name: "mysterious capsule",
-        size: timeMachineSize,
-        view: () => [
-            cond(notTimeMachineInvestigated, button("investigate", () => {
-                timeMachineInvestigated.value = true
-                // TODO: inside you find...
-            }, ".width")),
-            cond(timeMachineInvestigated, m("div",
-                cond(notTimeMachineFixed, button("fix time machine (5 metal)", () => {
-                    if (items.metal.qty.value >= 5) {
-                        timeMachineLevel.value += 1
-                        timeMachineFixed.value = true
-                        items.metal.qty.use(5)
-                    }
-                }, ".width")),
-                button("travel back to the start", () => {}, ".width")
-            ))
-        ]
-    },
-    {
-        name: "compost",
-        size: new Var("tiles.compost.size", 0),
-        view: () => [
-            m("div.p.center", s("~~ net weight: ", compostWeight, " ~~")),
-            ...Object.values(items)
-                .filter((item) => item.compostable)
-                .map((item) => m("div.row",
-                    button(`sacrafice 1 ${item.name}`, () => compost1(item.name), ".flex.margin-right"),
-                    button(`sacrafice all ${item.name}`, () => compostAll(item.name), ".flex"),
-                )),
-            buttonWithTimer(
-                "recive the blessing of the soil",
-                compostTimer,
-                () => {
-                    if (compostWeight.value >= 4) {
-                        const sqrt = Math.sqrt(compostWeight.value)
-                        compostWeight.use(sqrt)
-                        items.soil.qty.add(1)
-                    }
-                },
-                ".width"
-            )
-        ]
+const timeMachineUsable = new Eq(
+    () => timeMachineLevel.value >= 0,
+    [ timeMachineLevel ]
+)
+
+function investigateTimeMachine() {
+    timeMachineInvestigated.value = true
+    // TODO: inside you find...
+}
+
+function fixTimeMachine() {
+    if (items.metal.qty.value >= 5) {
+        timeMachineLevel.value += 1
+        timeMachineFixed.value = true
+        items.metal.qty.use(5)
     }
-]
+}
 
-export const buildButtons = [
-    {
-        name: "build compost shrine (3 food)",
-        visable: new Eq(() =>
-            tiles.find((t) => t.name === "compost").size.value == 0
-        , [ tiles.find((t) => t.name === "compost").size ]),
-        onclick: () => {
-            if (items.food.qty.value >= 3) {
-                items.food.qty.use(3)
-                tiles.find((t) => t.name === "compost").size.value = 1
-            }
-        }
-    },
-    ...Object.values(crops).map((crop) => ({
-        name: `plant ${crop.name} (1 soil)`,
-        onclick: () => {
-            if (items.soil.qty.value >= 1) {
-                items.soil.qty.use(1)
-                crop.qty.add(1)
-            }
-        }
-    }))
-]
-
-// EQUATIONS //
-
-export const newTileCost = new Eq(() =>
-    3 ** (space.value - space.default + 1),
-[space])
-
-export const emptyTiles = new Eq(() => {
-    const usedTiles = tiles
-        .map(tile => tile.size.value)
-        .reduce((a, b) => a + b, 0)
-    
-    return space.value - usedTiles
-}, [space, ...tiles.map(tile => tile.size)])
+addTile({
+    name: "mysterious capsule",
+    size: timeMachineSize,
+    view: () => [
+        cond(notTimeMachineInvestigated, button("investigate", investigateTimeMachine, ".width")),
+        cond(timeMachineInvestigated, m("div",
+            cond(notTimeMachineFixed, button("fix time machine (5 metal)", fixTimeMachine, ".width")),
+            cond(timeMachineUsable, button("travel back to the start", () => {}, ".width"))
+        ))
+    ]
+})

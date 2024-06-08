@@ -10,7 +10,7 @@ export default function display() {
                 cond(tile.size, box(s(tile.name, " (", tile.size, ")"), tile.view()))
             ),
             box(s("empty tiles (", data.emptyTiles, ")"),
-                data.buildButtons.map((buildButton) => 
+                data.buildTileButtons.map((buildButton) => 
                     cond(buildButton.visable, button(buildButton.name, buildButton.onclick, ".width"))
                 )
             ),
