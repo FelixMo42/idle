@@ -51,7 +51,13 @@ export function button(text, onclick, classes="") {
 }
 
 export function buttonWithTimer(text, timer, onclick, classes="") {
-    const el = m("button" + classes, text)
+    const cooldown = m("div.cooldown")
+
+    const el = m("button" + classes, text, cooldown)
+
+    setInterval(() => {
+        cooldown.style.width = `${timer.percent()}%`
+    }, 10)
 
     el.onclick = () => {
         if (timer.done()) {

@@ -55,13 +55,12 @@ export class Eq extends Watchable {
 }
 
 export class Timer extends Watchable {
-    time = 0
-
     constructor(name) {
         super()
 
         this.name = name
         this.time = load(name, 0)
+        this.start = load(name + ".start", 0)
 
         if (this.time > Date.now()) {
             setTimeout(() => this.fire(), this.time - Date.now())
@@ -69,11 +68,27 @@ export class Timer extends Watchable {
     }
 
     set(length) {
-        if (!length) throw new Error("no length!")
+        // update data
         this.time = Date.now() + length
+        this.start = Date.now()
+        
+        // save it
         save(this.name, this.time)
+        save(this.name + ".start", this.start)
+
+        // trigger callbacks
         this.fire()
         setTimeout(() => this.fire(), length)
+    }
+
+    percent() {
+        if (this.done()) return 0
+        if (this.time === 0) return 0
+
+        const duration = this.time - this.start
+        const elapsed = Date.now() - this.start
+
+        return 100 - Math.floor(elapsed / duration * 10000) / 100
     }
 
     done() {

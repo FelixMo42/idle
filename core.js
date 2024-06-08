@@ -208,9 +208,52 @@ const timeMachineUsable = new Eq(
     [ timeMachineLevel ]
 )
 
+//
+
+const popel = document.getElementById("popup")
+popel.onclick = () => closePopup()
+
+const popcel = document.getElementById("popc")
+popcel.onclick = (e) => e.stopPropagation()
+
+function popup(el) {
+    popel.classList.remove("hide")
+    popcel.replaceChildren(el)
+}
+
+function closePopup(el) {
+    popel.classList.add("hide")
+}
+
+//
+
 function investigateTimeMachine() {
-    timeMachineInvestigated.value = true
-    // TODO: inside you find...
+    // timeMachineInvestigated.value = true
+    popup(m("div",
+        m("div.title.p", "> explore the pod"),
+        m("div.p",
+            "The door opens with a hissssss. ",
+            "Inside is a pile of goo wearing cloths.",
+        ),
+        m("div.title.p", "> pickpocket the goo"),
+        m("div.p",
+            "You find a ", m("span.green", "time machine instruction manual"), "!!! ",
+            "They must have intrepid explorer must be from the future! ",
+            "It's too bad he's a pile of goo now.",
+        ),
+        m("div.title.p", "> travel to the year 9001!"),
+        m("div.p",
+            "clank ^barn &*, piiiishhh plop %o6 ~~!"
+        ),
+        m("div.p",
+            "You open the door..."
+        ),
+        m("div.p",
+            "Bummer. ",
+            "Looks like its broken. ",
+        ),
+        button("exit the broken time machine", () => closePopup(), ".width")
+    ))
 }
 
 function fixTimeMachine() {

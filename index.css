@@ -33,6 +33,7 @@ body {
 /* GENERAL STYLE */
 
 button {
+    position: relative;
     border-radius: 0;
     background: none;
     border: 1px solid black;
@@ -86,7 +87,8 @@ label.box {
 }
 
 .disabled {
-    background-color: gray;
+    color: gray;
+    border-color: gray;
 }
 
 .width {
@@ -107,4 +109,43 @@ label.box {
 
 .hide {
     display: none !important;
+}
+
+#popup {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+}
+
+#popc {
+    margin: auto;
+    background-color: white;
+    width: 300px;
+    border: 1px solid black;
+    padding: var(--padding);
+}
+
+.title {
+    font-weight: bold;
+}
+
+.green {
+    color: green;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.cooldown {
+    background-color: rgba(0, 0, 0, 0.3);
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%;
 }
