@@ -1,6 +1,6 @@
 
-import { button, buttonWithTimer, cond, m, s } from "./el.ts"
-import { Eq, GVar, Gettable, Timer, Value, Var, get, minute } from "./lib.ts"
+import { button, buttonWithTimer, cond, m, s } from "./el.tsx"
+import { Eq, GVar, Gettable, Timer, Value, Var, get, minute } from "./lib.tsx"
 
 // ITEMS //
 
@@ -125,20 +125,17 @@ addTile({
         [...Object.values(crops).map(crop => crop.qty)]
     ),
     view: () => Object.values(crops).map((crop) =>
-        m("div.row",
-            buttonWithTimer(
-                s("harvest ", crop.name, " (", crop.qty, ")"),
-                crop.timer,
-                () => {
-                    if (crop.timer.done()) {
-                        crop.timer.set(crop.growTime)
-                        for (let i = 0; i < crop.qty.value; i++) {
-                            crop.action()
-                        }
+        buttonWithTimer(
+            s("harvest ", crop.name, " (", crop.qty, ")"),
+            crop.timer,
+            () => {
+                if (crop.timer.done()) {
+                    crop.timer.set(crop.growTime)
+                    for (let i = 0; i < crop.qty.value; i++) {
+                        crop.action()
                     }
-                },
-                ".width"
-            ),
+                }
+            }
         ),
     )
 })
@@ -179,8 +176,8 @@ const compostTile = {
         ...Object.values(items)
             .filter((item) => item.compostable)
             .map((item) => m("div.row",
-                button(`sacrafice 1 ${item.name}`, () => compost1(item.name), ".flex.margin-right"),
-                button(`sacrafice all ${item.name}`, () => compostAll(item.name), ".flex"),
+                button(`sacrifice 1 ${item.name}`, () => compost1(item.name)),
+                button(`sacrifice all ${item.name}`, () => compostAll(item.name)),
             )),
         buttonWithTimer(
             "recive the blessing of the soil",
@@ -191,8 +188,7 @@ const compostTile = {
                     compostWeight.use(sqrt)
                     items.soil.qty.add(1)
                 }
-            },
-            ".width"
+            }
         )
     ]
 }
@@ -279,7 +275,7 @@ function investigateTimeMachine() {
             "Bummer. ",
             "Looks like its broken. ",
         ),
-        button("exit the broken time machine", () => closePopup(), ".width")
+        button("exit the broken time machine", () => closePopup())
     ))
 }
 
@@ -295,10 +291,10 @@ addTile({
     name: "mysterious capsule",
     size: timeMachineSize,
     view: () => [
-        cond(notTimeMachineInvestigated, button("investigate", investigateTimeMachine, ".width")),
+        cond(notTimeMachineInvestigated, button("investigate", investigateTimeMachine)),
         cond(timeMachineInvestigated, m("div",
-            cond(notTimeMachineFixed, button("fix time machine (5 metal)", fixTimeMachine, ".width")),
-            cond(timeMachineUsable, button("travel back to the start", () => {}, ".width"))
+            cond(notTimeMachineFixed, button("fix time machine (5 metal)", fixTimeMachine)),
+            cond(timeMachineUsable, button("travel back to the start", () => {}))
         ))
     ]
 })

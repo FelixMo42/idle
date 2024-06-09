@@ -30,9 +30,10 @@ body {
     margin: var(--padding) 0px;
 }
 
-/* GENERAL STYLE */
+/* BUTTON */
 
-button {
+.button {
+    display: block;
     position: relative;
     border-radius: 0;
     background: none;
@@ -41,17 +42,48 @@ button {
     font-size: 1em;
     cursor: pointer;
     margin-bottom: var(--padding);
+    text-align: center;
 }
 
-button:hover {
+.row .button {
+    margin-right: var(--padding);
+    flex: 1;
+}
+
+.row .button:last-child {
+    margin-right: 0px;
+}
+
+.button:hover {
     text-decoration: underline;
 }
 
+.disabled {
+    color: gray;
+    border-color: gray;
+}
+
+.cooldown {
+    background-color: rgba(0, 0, 0, 0.3);
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+}
+
+/* BOX */
+
 div.box {
     border: 1px solid black;
+
     padding: var(--padding);
     padding-bottom: 0px;
     margin-bottom: 5px;
+
+    display: flex;
+    flex-direction: column;
 }
 
 label.box {
@@ -62,6 +94,8 @@ label.box {
     margin-top: var(--padding);
     padding: 0px 3px;
 }
+
+/* FLEX */
 
 .row {
     display: flex;
@@ -77,42 +111,10 @@ label.box {
     flex: 1;
 }
 
-.align {
-    display: flex;
-    align-items: center;
-}
-
-.padding-top {
-    padding-top: 10px;
-}
-
-.disabled {
-    color: gray;
-    border-color: gray;
-}
-
-.width {
-    width: 100%;
-}
-
-.p {
-    padding-bottom: var(--padding);
-}
-
-.center {
-    text-align: center;
-}
-
-.margin-right {
-    margin-right: var(--padding);
-}
-
-.hide {
-    display: none !important;
-}
+/* POPUP */
 
 #popup {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.2);
     position: absolute;
     top: 0;
     left: 0;
@@ -126,8 +128,18 @@ label.box {
     margin: auto;
     background-color: white;
     width: 300px;
-    border: 1px solid black;
+    border: 2px solid black;
     padding: var(--padding);
+}
+
+/* P */
+
+.p {
+    padding-bottom: var(--padding);
+}
+
+.center {
+    text-align: center;
 }
 
 .title {
@@ -140,12 +152,8 @@ label.box {
     text-decoration: underline;
 }
 
-.cooldown {
-    background-color: rgba(0, 0, 0, 0.3);
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 0%;
+/* MISC */
+
+.hide {
+    display: none !important;
 }

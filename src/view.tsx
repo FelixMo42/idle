@@ -1,6 +1,18 @@
-import { m, button, box, s, cond } from "./el.ts"
-import * as data from "./core.ts"
-import { Eq, get } from "./lib.ts"
+import { m, button, box, s, cond } from "./el.tsx"
+import * as data from "./core.tsx"
+import { Eq, get } from "./lib.tsx"
+
+//
+
+interface Props {
+    children?: any[]
+}
+
+function Row({ children }: Props) {
+    return <div class="row">{ ...children }</div>
+}
+
+//
 
 export default function display() {
     document
@@ -15,20 +27,19 @@ export default function display() {
             ),
             box(s("empty tiles (", data.emptyTiles, ")"),
                 data.buildTileButtons.map((buildButton) => 
-                    cond(buildButton.visable, button(buildButton.name, buildButton.onclick, ".width"))
+                    cond(buildButton.visable, button(buildButton.name, buildButton.onclick))
                 )
             ),
             /* Expand Island */
-            m("div.row.padding-top", button(
+            <Row>{ button(
                 s("expand island (", data.newTileCost, " wood)"),
                 () => {
                     if (get(data.items.wood.qty) >= data.newTileCost.value) {
                         data.items.wood.qty.use(data.newTileCost.value)
                         data.space.add(1)
                     }
-                },
-                ".flex"
-            )),
+                }
+            ) }</Row>
         )
 
     document

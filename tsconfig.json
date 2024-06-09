@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "jsx": "preserve",
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "lib": ["ES2023", "DOM"]
+    }
+}

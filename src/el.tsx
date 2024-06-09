@@ -1,4 +1,4 @@
-import { Gettable, Timer, Value, Watchable, get } from "./lib.ts"
+import { Gettable, Timer, Value, Watchable, get } from "./lib.tsx"
 
 type HTMLNode = Node | Value<string> | Value<number>
 
@@ -54,19 +54,25 @@ export function s(...parts: any) {
     return el
 }
 
-export function button(text: HTMLNode, onclick: () => void, classes="") {
-    const el = m("button" + classes, text)
+export function button(text: HTMLNode, onclick: () => void) {
+    const el = m("div.button", text)
     el.onclick = onclick
     return el
 }
 
-export function buttonWithTimer(text: HTMLNode, timer: Timer, onclick: () => void, classes="") {
+export function buttonWithTimer(text: HTMLNode, timer: Timer, onclick: () => void) {
     const cooldown = m("div.cooldown")
 
-    const el = m("button" + classes, text, cooldown)
+    const el = m("div.button", text, cooldown)
 
     setInterval(() => {
         cooldown.style.width = `${timer.percent()}%`
+
+        if (timer.done()) {
+            el.classList.remove("disabled")
+        } else {
+            el.classList.add("disabled")
+        }
     }, 10)
 
     el.onclick = () => {
@@ -77,26 +83,14 @@ export function buttonWithTimer(text: HTMLNode, timer: Timer, onclick: () => voi
         }
     }
 
-    if (!timer.done()) {
-        el.classList.add("disabled")
-    }
-
-    timer.watch(() => {
-        if (timer.done()) {
-            el.classList.remove("disabled")
-        } else {
-            el.classList.add("disabled")
-        }
-    })
-
     return el
 }
 
 export function box(label: HTMLNode, contents: HTMLNode[]) {
-    return m("div",
-        m("label.box", label),
-        m("div.box", ...contents)
-    )
+    return <div>
+        <label class="box">{label}</label>
+        <div class="box">{...contents}</div>
+    </div>
 }
 
 export function cond(show: Gettable<boolean> | undefined, el: HTMLElement) {
