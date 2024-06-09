@@ -5,6 +5,7 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0px;
+    background-color: teal;
 }
 
 * {
@@ -59,12 +60,12 @@ body {
 }
 
 .disabled {
-    color: gray;
-    border-color: gray;
+    color: darkslategray;
+    border-color: darkslategray;
 }
 
 .cooldown {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.1);
     position: absolute;
     z-index: -1;
     top: 0;
@@ -90,7 +91,7 @@ label.box {
     top: 5px;
     left: 14px;
     position: relative;
-    background-color: white;
+    background-color: teal;
     margin-top: var(--padding);
     padding: 0px 3px;
 }
@@ -126,7 +127,7 @@ label.box {
 
 #popc {
     margin: auto;
-    background-color: white;
+    background-color: teal;
     width: 300px;
     border: 2px solid black;
     padding: var(--padding);
@@ -147,7 +148,7 @@ label.box {
 }
 
 .green {
-    color: green;
+    color: darkgreen;
     font-weight: bold;
     text-decoration: underline;
 }

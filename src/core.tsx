@@ -253,7 +253,7 @@ function closePopup() {
 function investigateTimeMachine() {
     // timeMachineInvestigated.value = true
     popup(m("div",
-        m("div.title.p", "> explore the pod"),
+        m("div.title.p", "> investigate the pod"),
         m("div.p",
             "The door opens with a hissssss. ",
             "Inside is a pile of goo wearing cloths.",
