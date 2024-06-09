@@ -1,30 +1,40 @@
-import { Watchable } from "./lib.js"
+import { Gettable, Timer, Value, Watchable, get } from "./lib.ts"
 
-export function m(desc, ...children) {
+type HTMLNode = Node | Value<string> | Value<number>
+
+export function m(desc: string, ...children: HTMLNode[]) {
     const [tagName, ...classList] = desc.split(".")
     const el = document.createElement(tagName)
-    el.classList = classList.join(" ")
+    el.classList.add(...classList)
     el.replaceChildren(...children.map((c) => {
-        if (c instanceof Watchable) {
-            const cel = m("span", c.value)
-            c.watch(() => cel.replaceChildren(c.value))
+        function format(v: Node | string | number): Node | string {
+            if (typeof v === "number") {
+                return String(Math.floor(v * 100) / 100)
+            } else {
+                return v
+            }
+        }
+
+        if (c instanceof Gettable) {
+            const cel = m("span", format(c.value))
+            c.watch(() => cel.replaceChildren(format(c.value)))
             return cel
         } else {
-            return c
+            return format(c)
         }
     }))
     return el
 }
 
-export function s(...parts) {
+export function s(...parts: any) {
     const make = () => parts
-        .map((part) => {
-            if (part instanceof Watchable) {
-                if (typeof part.value === "number") {
-                    return Math.floor(part.value * 100) / 100
+        .map((part: any) => {
+            if (part instanceof Gettable) {
+                if (typeof get(part) === "number") {
+                    return Math.floor(get(part) * 100) / 100
                 }
 
-                return part.value
+                return get(part)
             } else {
                 return part
             }
@@ -44,13 +54,13 @@ export function s(...parts) {
     return el
 }
 
-export function button(text, onclick, classes="") {
+export function button(text: HTMLNode, onclick: () => void, classes="") {
     const el = m("button" + classes, text)
     el.onclick = onclick
     return el
 }
 
-export function buttonWithTimer(text, timer, onclick, classes="") {
+export function buttonWithTimer(text: HTMLNode, timer: Timer, onclick: () => void, classes="") {
     const cooldown = m("div.cooldown")
 
     const el = m("button" + classes, text, cooldown)
@@ -82,18 +92,20 @@ export function buttonWithTimer(text, timer, onclick, classes="") {
     return el
 }
 
-export function box(label, contents) {
+export function box(label: HTMLNode, contents: HTMLNode[]) {
     return m("div",
         m("label.box", label),
         m("div.box", ...contents)
     )
 }
 
-export function cond(show, el) {
-    if (show === undefined) return el
+export function cond(show: Gettable<boolean> | undefined, el: HTMLElement) {
+    if (show === undefined) {
+        return el
+    }
 
     function check() {
-        if (show.value) {
+        if (show?.value) {
             el.classList.remove("hide")
         } else {
             el.classList.add("hide")

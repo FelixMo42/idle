@@ -1,12 +1,25 @@
 
-import { button, buttonWithTimer, cond, m, s } from "./el.js"
-import { Eq, Timer, Var, minute } from "./lib.js"
+import { button, buttonWithTimer, cond, m, s } from "./el.ts"
+import { Eq, GVar, Gettable, Timer, Value, Var, get, minute } from "./lib.ts"
 
 // ITEMS //
 
-export const items = {}
+interface ItemDO {
+    name: string;
+    weight: number;
+    compostable?: boolean; 
+}
 
-function addItems(...descs) {
+interface Item {
+    name: string;
+    weight: number;
+    qty: Var;
+    compostable?: boolean; 
+}
+
+export const items: { [k: string]: Item } = {}
+
+function addItems(...descs: ItemDO[]) {
     for (const desc of descs) {
         items[desc.name] = {
             qty: new Var(`items.${desc.name}.qty`, 0),
@@ -38,9 +51,15 @@ addItems(
 
 // TILES //
 
+interface Tile {
+    name: string;
+    size: Value<number>;
+    view: () => HTMLElement[];
+}
+
 export const space = new Var("space", 7)
 
-export const tiles = []
+export const tiles: Array<Tile> = []
 
 export const newTileCost = new Eq(() =>
     3 ** (space.value - space.default + 1),
@@ -48,19 +67,25 @@ export const newTileCost = new Eq(() =>
 
 export const emptyTiles = new Eq(() => {
     const usedTiles = tiles
-        .map(tile => tile.size.value)
+        .map(tile => get(tile.size))
         .reduce((a, b) => a + b, 0)
     
     return space.value - usedTiles
 }, [space, ...tiles.map(tile => tile.size)])
 
-function addTile(...descs) {
+function addTile(...descs: Tile[]) {
     tiles.push(...descs)
 }
 
-export const buildTileButtons = []
+interface BuildTileButton {
+    name: string;
+    visable?: Gettable<boolean>;
+    onclick: () => void;
+}
 
-function addBuildTileButton(...descs) {
+export const buildTileButtons: BuildTileButton[] = []
+
+function addBuildTileButton(...descs: BuildTileButton[]) {
     buildTileButtons.push(...descs.map((desc) => ({
         ...desc,
         onclick: () => {
@@ -108,7 +133,7 @@ addTile({
                     if (crop.timer.done()) {
                         crop.timer.set(crop.growTime)
                         for (let i = 0; i < crop.qty.value; i++) {
-                            crop.action(crop)
+                            crop.action()
                         }
                     }
                 },
@@ -146,7 +171,7 @@ function compostAll(itemName) {
     items[itemName].qty.use(qty)
 }
 
-addTile({
+const compostTile = {
     name: "compost",
     size: new Var("tiles.compost.size", 0),
     view: () => [
@@ -170,29 +195,31 @@ addTile({
             ".width"
         )
     ]
-})
+}
+
+addTile(compostTile)
 
 addBuildTileButton({
     name: "build compost shrine (3 food)",
     visable: new Eq(() =>
-        tiles.find((t) => t.name === "compost").size.value == 0
-    , [ tiles.find((t) => t.name === "compost").size ]),
+        compostTile.size.value == 0
+    , [ compostTile.size ]),
     onclick: () => {
         if (items.food.qty.value >= 3) {
             items.food.qty.use(3)
-            tiles.find((t) => t.name === "compost").size.value = 1
+            compostTile.size.value = 1
         }
     }
 })
 
 // TIME MACHINE // 
 
-const timeMachineInvestigated = new Var("time_machine.investigated")
+const timeMachineInvestigated = new GVar("time_machine.investigated", false)
 const notTimeMachineInvestigated = new Eq(
     () => !timeMachineInvestigated.value,
     [ timeMachineInvestigated ]
 )
-const timeMachineFixed = new Var("time_machine.fixed", false)
+const timeMachineFixed = new GVar("time_machine.fixed", false)
 const notTimeMachineFixed = new Eq(
     () => !timeMachineFixed.value,
     [ timeMachineFixed ]
@@ -210,18 +237,18 @@ const timeMachineUsable = new Eq(
 
 //
 
-const popel = document.getElementById("popup")
+const popel = document.getElementById("popup")!
 popel.onclick = () => closePopup()
 
-const popcel = document.getElementById("popc")
+const popcel = document.getElementById("popc")!
 popcel.onclick = (e) => e.stopPropagation()
 
-function popup(el) {
+function popup(el: HTMLElement) {
     popel.classList.remove("hide")
     popcel.replaceChildren(el)
 }
 
-function closePopup(el) {
+function closePopup() {
     popel.classList.add("hide")
 }
 

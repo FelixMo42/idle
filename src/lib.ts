@@ -1,22 +1,38 @@
+export type Value<T> = T | Gettable<T>
+
+export function get<T>(value: Value<T>): T {
+    if (value instanceof Gettable) return value.value
+    return value
+}
+
 export class Watchable {
-    callbacks = []
+    callbacks: Array<() => void> = []
 
     fire() {
-        this.callbacks.forEach((cb) => cb(this))
+        this.callbacks.forEach((cb) => cb())
     }
 
-    watch(cb) {
+    watch(cb: () => void) {
         this.callbacks.push(cb)
     }
 }
 
-export class Var extends Watchable {
-    constructor(name, value) {
+export abstract class Gettable<T> extends Watchable {
+    abstract value: T
+}
+
+export class GVar<T> extends Gettable<T> {
+    name: string;
+    default: T;
+
+    private _value: T;
+
+    constructor(name: string, value: T) {
         super()
 
+        this.name = name
         this.default = value
         this._value = load(name, value)
-        this.name = name
     }
 
     get value() {
@@ -28,24 +44,30 @@ export class Var extends Watchable {
         save(this.name, v)
         this.fire()
     }
+}
 
-    add(amt) {
+export class Var extends GVar<number> {
+    add(amt: number) {
         this.value += amt
     }
 
-    use(amt) {
+    use(amt: number) {
         this.value -= amt
     }
 }
 
-export class Eq extends Watchable {
-    constructor(func, use) {
+export class Eq<T> extends Gettable<T> {
+    func: () => T
+
+    constructor(func: () => T, use: Array<any>) {
         super()
 
         this.func = func
 
         for (const dep of use) {
-            dep.watch(() => this.fire())
+            if (dep instanceof Watchable) {
+                dep.watch(() => this.fire())
+            }
         }
     }
 
@@ -55,7 +77,11 @@ export class Eq extends Watchable {
 }
 
 export class Timer extends Watchable {
-    constructor(name) {
+    name: string
+    time: number
+    start: number
+
+    constructor(name: string) {
         super()
 
         this.name = name
@@ -67,7 +93,7 @@ export class Timer extends Watchable {
         }
     }
 
-    set(length) {
+    set(length: number) {
         // update data
         this.time = Date.now() + length
         this.start = Date.now()
@@ -106,11 +132,11 @@ export class Timer extends Watchable {
     }
 }
 
-function save(name, value) {
+function save<T>(name: string, value: T) {
     localStorage.setItem(name, JSON.stringify(value))
 }
 
-function load(name, def) {
+function load<T>(name: string, def: T): T {
     const data = localStorage.getItem(name)
     
     if (data) {
@@ -120,23 +146,10 @@ function load(name, def) {
     return def
 }
 
-export function seconds(amu) {
+export function seconds(amu: number) {
     return amu * 1000
 }
 
-export function minute(amu) {
+export function minute(amu: number) {
     return seconds(amu * 60)
-}
-
-export function toObj(arr, func) {
-    let obj = {}
-
-    arr.forEach(v => {
-        obj = {
-            ...obj,
-            ...func(v)
-        }
-    })
-
-    return obj
 }

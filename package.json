@@ -1,0 +1,16 @@
+{
+    "name": "idle",
+    "version": "0.4.0",
+    "description": "a dumb little idle name",
+    "main": "src/index.ts",
+    "scripts": {
+        "build": "esbuild src/index.ts --bundle --sourcemap --outfile=out/index.js",
+        "watch": "esbuild src/index.ts --watch --bundle --sourcemap --outfile=out/index.js",
+        "serve": "python3 -m http.server"
+    },
+    "author": "Felix Moses <FelixMo42>",
+    "license": "WTFPL",
+    "dependencies": {
+        "esbuild": "0.21.4"
+    }
+}
