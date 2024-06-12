@@ -88,9 +88,28 @@ export function buttonWithTimer(text: HTMLNode, timer: Timer, onclick: () => voi
 
 export function box(label: HTMLNode, contents: HTMLNode[]) {
     return <div>
-        <label class="box">{label}</label>
+        <span class="box"><span>{label}</span></span>
         <div class="box">{...contents}</div>
     </div>
+}
+
+interface BoxeParams {
+    label: HTMLNode,
+    contents: HTMLNode[],
+    fadeIn?: boolean
+}
+
+export function boxe(params: BoxeParams) {
+    const el = <div>
+        <span class="box"><span>{params.label}</span></span>
+        <div class="box">{...params.contents}</div>
+    </div>
+
+    if (params.fadeIn) {
+        el.classList.add("fade-in")
+    }
+
+    return el
 }
 
 export function cond(show: Gettable<boolean> | undefined, el: HTMLElement) {

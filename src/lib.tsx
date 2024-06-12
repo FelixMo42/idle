@@ -46,6 +46,20 @@ export class GVar<T> extends Gettable<T> {
     }
 }
 
+interface WithId {
+    id: string;
+}
+
+export class ArrVar<T extends WithId> extends GVar<string[]> {
+    constructor(name: string) {
+        super(name, [])
+    }
+
+    push(...vs: T[]) {
+        this.value.push(...vs.map((v) => v.id))
+    }
+}
+
 export class Var extends GVar<number> {
     add(amt: number) {
         this.value += amt

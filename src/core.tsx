@@ -98,33 +98,46 @@ function addBuildTileButton(...descs: BuildTileButton[]) {
 
 // GARDEN //
 
-export const crops = {
-    corn: {
-        name: "corn",
+export const cropTypes = {
+    berries: {
+        name: "berries",
         weight: 1,
-        qty: new Var("crops.cord.qty", 1),
         growTime: minute(1),
-        timer: new Timer("crops.corn.timer"),
         action: () => items.food.qty.add(1)
     },
     tree: {
         name: "tree",
         weight: 5,
-        qty: new Var("crops.tree.qty", 1),
         growTime: minute(60),
         timer: new Timer("crops.tree.timer"),
         action: () => items.wood.qty.add(1)
     }
 }
 
+const crops = new GVar("crops")
+
+function uuid() {
+    return String(Math.floor(Math.random() * 100000))
+}
+
+function plantCrop(name) {
+    const id = uuid()
+    crops.value.push({
+        ...cropTypes[name],
+        timer: new Timer(`crops.${id}.timer`),
+    })
+
+    crops.fire()
+}
+
 addTile({
     name: "garden",
-    size: new Eq(() => Object.values(crops)
+    size: new Eq(() => crops.value
         .map(crop => crop.qty.value)
         .reduce((a, b) => a + b),
-        [...Object.values(crops).map(crop => crop.qty)]
+        [ crops ]
     ),
-    view: () => Object.values(crops).map((crop) =>
+    view: () => crops.map((crop) =>
         buttonWithTimer(
             s("harvest ", crop.name, " (", crop.qty, ")"),
             crop.timer,
