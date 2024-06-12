@@ -1,5 +1,6 @@
 :root {
     --padding: 7px;
+    font-size: 1.2em;
 }
 
 body {
@@ -21,14 +22,20 @@ body {
     margin: auto;
 }
 
+#left-bar, #right-bar, #center-bar {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 #left-bar, #right-bar {
     width: 250px;
-    margin: var(--padding);
+    padding: var(--padding);
 }
 
 #center-bar {
     flex: 1;
-    margin: var(--padding) 0px;
+    padding: var(--padding) 0px;
 }
 
 /* BUTTON */
@@ -76,6 +83,11 @@ body {
 
 /* BOX */
 
+div:has(.box) {
+    display: flex;
+    flex-direction: column;
+}
+
 div.box {
     border: 1px solid black;
 
@@ -87,12 +99,16 @@ div.box {
     flex-direction: column;
 }
 
-label.box {
+span.box {
     top: 5px;
     left: 14px;
     position: relative;
-    background-color: teal;
+    
     margin-top: var(--padding);
+}
+
+span.box span {
+    background-color: teal;
     padding: 0px 3px;
 }
 
@@ -145,6 +161,17 @@ label.box {
 
 .title {
     font-weight: bold;
+    padding-top: 15px;
+}
+
+.b {
+    text-decoration: underline;
+    color: darkblue;
+    cursor: pointer;
+}
+
+.title:first-child {
+    padding-top: 0px;
 }
 
 .green {
@@ -157,4 +184,15 @@ label.box {
 
 .hide {
     display: none !important;
+}
+
+/* ANIM */
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+  
+.fade-in {
+    animation: fadeIn 2s;
 }
